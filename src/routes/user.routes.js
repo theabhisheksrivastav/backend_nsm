@@ -6,7 +6,9 @@ import {
     refreshAccessToken, 
     changeCurrentPassword, 
     getCurrentUser, 
-    updateAccountDetails
+    updateAccountDetails,
+ 
+    varifyOTP
  } from "../controllers/user.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 
@@ -14,6 +16,10 @@ const router = Router();
 
 router.route("/register").post(registerUser)
 router.route("/login").post(loginUser)
+
+router.route("/api/verify-otp").post(varifyOTP)
+
+
 
 // secured routes
 router.route("/logout").post(verifyJWT, logoutUser)
