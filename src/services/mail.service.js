@@ -10,11 +10,6 @@ const transporter = nodemailer.createTransport({
   });
 
 export const sendmail = async (email, verificationCode, html, subject)=>{
-    otpStorage[email] = {
-      verificationCode,
-      expiresAt: Date.now() + 5 * 60 * 1000w
-    };
-  
     const mailOptions = {
       from: process.env.EMAIL,
       to: email,

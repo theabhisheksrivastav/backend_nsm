@@ -1,6 +1,6 @@
 export const DB_NAME = 'mydb'
 
-export const otpSendHtml = `
+export const otpSendHtml = (verificationCode) => `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #f0f0f0; border-radius: 10px;">
           <h2 style="text-align: center; color: #0044cc;">North Star Matrix</h2>
           <p>Hello,</p>

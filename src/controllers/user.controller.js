@@ -46,7 +46,7 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new apiError(409, 'User already exists')
    }
     const verificationCode = generateVerificationCode();
-    const isMailSent = await sendmail(email, verificationCode, otpSendHtml, 'Your OTP Code - North Star Matrix')
+    const isMailSent = await sendmail(email, verificationCode, otpSendHtml(verificationCode), 'Your OTP Code - North Star Matrix')
     if (isMailSent) {
       otpStorage[email] = {
         verificationCode,
