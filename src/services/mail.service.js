@@ -18,7 +18,7 @@ export const sendmail = async (email, verificationCode, html, subject)=>{
       subject: subject,
       html: html,
     };
-     transporter.sendMail(mailOptions, (error, info) => {
+     await transporter.sendMail(mailOptions, (error, info) => {
       if (error) {
         console.log(error);
         return  false;
