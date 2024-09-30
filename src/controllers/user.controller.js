@@ -294,7 +294,8 @@ const transporter = nodemailer.createTransport({
 
 const sendmail = async (email)=>{
 
- 
+  
+  
   const verificationCode = generateVerificationCode();
   console.log(email);
   
