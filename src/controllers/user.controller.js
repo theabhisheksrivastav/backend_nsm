@@ -1,13 +1,16 @@
 import {asyncHandler} from '../utils/asyncHandler.js'
 import {apiError} from '../utils/apiError.js'
-import nodemailer from 'nodemailer';
 import {User} from '../models/user.model.js' 
 import {apiResponse} from '../utils/apiResponse.js'
 import jwt from 'jsonwebtoken'
-import mongoose, { set } from 'mongoose'
+import { sendmail } from '../services/mail.service.js'
+import { otpSendHtml } from '../constant.js'
 
-let otpStorage = {}; // Object to store OTPs in memory
-const name = {}
+const otpStorage = {};
+
+function generateVerificationCode() {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+}
 
 const generateAccessAndRefreshToken = async (userId) => 
 { 
@@ -40,40 +43,56 @@ const registerUser = asyncHandler(async (req, res) => {
    })
  res.status(400)
    if (existedUser) {
-<<<<<<< HEAD
     throw new apiError(409, 'User already exists')
-=======
-   
-    return res.status(201).send({sucess:false,message:'user alrredy exiest'})
->>>>>>> a38bf31e7a5074879726d2b737dd8e04ea608826
    }
-
-  
-  // const passwordHash = await bcrypt.hash(password, 10)
-
-  const ans = await sendmail(email)
-  if (ans) {
-    return res.status(200).send({sucess:true,message:'OTP send succesfully'})
-  }else{
-    return res.status(200).send({sucess:true,message:'Something went wrong'})
-  }
-
-  // const user = await User.create({
-  //   fullname,
-  //   email,
-  //   password,
-  //   username
-  // })
-
-  // const createdUser = await User.findById(user._id).select('-password -refreshToken')
-
-  // if (!createdUser) {
-  //   // res.status(500)
-  //   return res.status(500).send({sucess:false,message:'internal server error'})
-  // }
-  // return res.status(201).send({sucess:true,message:'user saved'})
-
+    const verificationCode = generateVerificationCode();
+    const isMailSent = await sendmail(email, verificationCode, otpSendHtml, 'Your OTP Code - North Star Matrix')
+    if (isMailSent) {
+      otpStorage[email] = {
+        verificationCode,
+        expiresAt: Date.now() + 5 * 60 * 1000,
+      };
+      return res.status(200).send({ success: true, message: 'OTP sent successfully' });
+    } else {
+      throw new apiError(500, 'Something went wrong while sending OTP');
+    }
 })
+
+const verifyUser = asyncHandler(async (req, res) => {
+  const { username, fullname, email, password, otp } = req.body;
+
+  if (!username || !fullname || !email || !password || !otp) {
+    throw new apiError(400, 'Please fill all the required fields');
+  }
+  if (!otpStorage[email]) {
+    throw new apiError(400, 'OTP not found or expired. Please request a new one.');
+  }
+  if (otpStorage[email].verificationCode === otp && Date.now() < otpStorage[email].expiresAt) {
+    try {
+      const existingUser = await User.findOne({ $or: [{ username }, { email }] });
+      if (existingUser) {
+        throw new apiError(409, `User already exists with ${username === existingUser.username ? 'username' : 'email'}`);
+      }
+      const user = await User.create({
+        fullname,
+        email,
+        password,
+        username,
+      });
+
+      if (user) {
+        delete otpStorage[email];
+        return res.status(201).send({ success: true, message: 'User created successfully' });
+      } else {
+        throw new apiError(500, 'Failed to create user');
+      }
+    } catch (error) {
+      throw new apiError(500, error.message || 'Internal server error');
+    }
+  } else {
+    throw new apiError(400, 'Invalid or expired OTP');
+  }
+});
 
 const loginUser = asyncHandler(async (req, res) => {
   /*
@@ -134,7 +153,7 @@ const { username, email, password } = req.body
 })
 
 const logoutUser = asyncHandler(async (req, res) => {
-  User.findByIdAndUpdate(req.user._id, {
+  await User.findByIdAndUpdate(req.user._id, {
     $unset: {
       refreshToken: 1
     },
@@ -266,138 +285,6 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
 
 })
 
-function generateVerificationCode() {
-  return Math.floor(100000 + Math.random() * 900000).toString();
-}
-// Nodemailer transporter setup
-const transporter = nodemailer.createTransport({
-  service: 'gmail', // or any other email service provider
-  auth: {
-    user: process.env.EMAIL, // Your email address
-    pass: process.env.PASSWARD, // Your email password
-  },
-});
-
-
-const sendmail = async (email)=>{
-
-  
-  
-  const verificationCode = generateVerificationCode();
-  console.log(email);
-  
-
-  if (!email) {
-    return  false;
-  }
-
-  console.log(email);
-  
-
-  // Create a verification code using JWT
-  
-  otpStorage[email] = {
-    verificationCode,
-    expiresAt: Date.now() + 5 * 60 * 1000 // Expire in 5 minutes
-  };
-
-  const mailOptions = {
-    from: process.env.EMAIL,
-    to: email,
-    subject: 'Your OTP Code - North Star Matrix',
-    html: `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #f0f0f0; border-radius: 10px;">
-        <h2 style="text-align: center; color: #0044cc;">North Star Matrix</h2>
-        <p>Hello,</p>
-        <p>We have received a request to verify your identity. Please use the following OTP to complete your verification process:</p>
-        <p style="font-size: 24px; font-weight: bold; color: #0044cc; text-align: center; padding: 10px; border: 1px solid #0044cc; border-radius: 8px; display: inline-block;">
-          ${verificationCode}
-        </p>
-        <p>This code is valid for <strong>5 minutes</strong>.</p>
-        <p>If you did not request this OTP, please contact our support team immediately at <a href="mailto:support@northstarmatrix.com" style="color: #0044cc; text-decoration: none;">support@northstarmatrix.com</a>.</p>
-        <p>Thank you,<br>North Star Matrix Team</p>
-        <hr style="border: none; border-top: 1px solid #ddd;" />
-        <p style="font-size: 12px; color: #888888; text-align: center;">
-          © 2024 North Star Matrix. All rights reserved.
-        </p>
-      </div>
-    `,
-  };
-console.log("upper error");
-   transporter.sendMail(mailOptions, (error, info) => {
-    if (error) {
-      
-      return  false;
-    }
-     return true;
-  });
-
-  return true
-
-}
-
-const varifyOTP = asyncHandler (async (req,res)=>{
-
- console.log("riched");
- 
-  
- try {
-  const { username, fullname, email, password, otp } = req.body
-
-
-  // Check if OTP exists and is valid
-  console.log(otp,email,username,fullname,password);
-  console.log(otpStorage[email]);
-  
-  
-  if (
-    otpStorage[email] &&
-    otpStorage[email].verificationCode === otp &&
-    Date.now() < otpStorage[email].expiresAt
-  ) {
-    // OTP is valid
-    delete otpStorage[email];
-    // const passwordHash = await bcrypt.hash(password, 10)
-  
-    
-  
-    const user = await User.create({
-      fullname,
-      email,
-      password,
-      username
-    })
-  
-    const createdUser = await User.findById(user._id).select('-password -refreshToken')
-  
-    if (!createdUser) {
-      // res.status(500)
-      return res.status(500).send({sucess:false,message:'internal server error'})
-    }
-    return res.status(201).send({sucess:true,message:'user saved'})
-
-
-     // OTP can be deleted after successful verification
-    return res.status(200).send({sucess:true,message:'OTP verified successfully'});
-  }
-
- res.status(400).send({sucess:false,message:'Inavalid and expire'});
-  
-
-  
- } catch (error) {
-  console.log(error);
-  
- }
-    
-   
-   
-   
-
-})
-
-
-
 export { 
   registerUser,
   loginUser,
@@ -406,6 +293,6 @@ export {
   changeCurrentPassword,
   getCurrentUser,
   updateAccountDetails,
-  varifyOTP
+  verifyUser
   
   }
