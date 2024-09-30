@@ -2,15 +2,13 @@ import nodemailer from 'nodemailer';
 
 
 const transporter = nodemailer.createTransport({
-    host: '127.0.0.1',
-    port: 1025,
-    secure: false,
+    host: 'smtp.protonmail.com',
+    port: 465,
+    secure: true,
     auth: {
       user: process.env.EMAIL,
       pass: process.env.PASSWORD,
-    },"tls": {
-            "rejectUnauthorized": false
-        }
+    },
   });
 
 export const sendmail = async (email, verificationCode, html, subject)=>{
