@@ -24,24 +24,11 @@ return {accessToken, refreshToken}
 }
 
 const registerUser = asyncHandler(async (req, res) => {
-  // res.status(200).json({ message: 'Hello Abhishek' })
-
-  /*
-    1. Get user data (username, Fullname, email, password, avatarImg, CoverImg) from req.body{Check if required feillds are not empty}
-    2. Check if user already exists in the database
-    3. Hash the password, Upload images to Cloudinary and get the URL
-    4. Create a new user Object {create entry in DB}
-    *5. Generate JWT token and send it to the user
-    5. remove password and refresh token from repsonse
-    6. check for user creation response and send the response to the user
-    7. Return the response to the user
-    */
   const { username, fullname, email, password } = req.body
 
   if (
     [fullname, username, email, password].some((field) => field?.trim() === "")
   ) {
-    // res.status(400)
     throw new apiError(400, 'Please fill all the required fields')
   }
     
@@ -50,7 +37,6 @@ const registerUser = asyncHandler(async (req, res) => {
    })
 
    if (existedUser) {
-    // res.status(400)
     throw new apiError(409, 'User already exists')
    }
 
@@ -126,10 +112,6 @@ const { username, email, password } = req.body
 })
 
 const logoutUser = asyncHandler(async (req, res) => {
-  /*
-  1. Clear cookies
-  2. Return the response to the user
-  */
   User.findByIdAndUpdate(req.user._id, {
     $unset: {
       refreshToken: 1
@@ -262,8 +244,6 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
 
 })
 
-
-//get user wallet details
 
 
 export { 
