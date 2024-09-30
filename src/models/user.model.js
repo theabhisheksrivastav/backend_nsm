@@ -30,6 +30,20 @@ const userSchema = new Schema(
             required : true,
             trim : true,
         },
+        isVerified: {
+            type : Boolean,
+            default : false,
+            required : true,
+        },
+        otp: {
+            type : String,
+            required : false,
+            trim : true,
+        },
+        otpExpires: {
+            type : Date,
+            required : false,
+        },
         refreshToken : {
             type : String,
             required : false,
