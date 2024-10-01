@@ -60,7 +60,6 @@ const registerUser = asyncHandler(async (req, res) => {
       const verificationCode = await verificationCodeMail(email);
       existedUser.otp.push(verificationCode);
       existedUser.otpExpires = Date.now() + 5 * 60 * 1000;
-      console.log(existedUser.otp.length);
       await existedUser.save({ validateBeforeSave: true });
       return res.status(209).send({ success: true, message: 'User already exists', attempts: existedUser.otp.length });
     }
@@ -84,13 +83,8 @@ const verifyUser = asyncHandler(async (req, res) => {
   if (!username || !fullname || !email || !password || !otp) {
     throw new apiError(400, 'Please fill all the required fields');
   }
-  console.log('User not found line87 ');
-
   const user = await User.findOne({ $or: [{ username }, { email }] });
-
   if (!user) {
-    console.log('User not found line 92');
-
     throw new apiError(404, 'User not found');
   }
 
@@ -109,7 +103,6 @@ const verifyUser = asyncHandler(async (req, res) => {
     throw new apiError(400, 'Invalid or expired OTP');
   }
 });
-
 
 const loginUser = asyncHandler(async (req, res) => {
   const { username, email, password } = req.body
@@ -141,12 +134,16 @@ const loginUser = asyncHandler(async (req, res) => {
 
 
 
-  return res.status(200).send({ success: true }).cookie("accessToken", accessToken, options).cookie("refreshToken", refreshToken, options).json(new apiResponse(200, {
+  return res
+  .status(200)
+  .cookie("accessToken", accessToken, options)
+  .cookie("refreshToken", refreshToken, options)
+  .json(new apiResponse(200, { 
     user: loggedInUser,
     accessToken,
     refreshToken
-  }
-    , 'User logged in successfully'))
+  }, 'User logged in successfully'));
+
 })
 
 const logoutUser = asyncHandler(async (req, res) => {
