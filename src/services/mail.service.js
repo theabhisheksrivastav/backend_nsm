@@ -11,14 +11,14 @@ const transporter = nodemailer.createTransport({
     },
   });
 
-export const sendmail = async (email, verificationCode, html, subject)=>{
+export const sendmail = async (email, html, subject)=>{
     const mailOptions = {
       from: process.env.EMAIL,
       to: email,
       subject: subject,
       html: html,
     };
-     await transporter.sendMail(mailOptions, (error, info) => {
+    transporter.sendMail(mailOptions, (error, info) => {
       if (error) {
         console.log(error);
         return  false;

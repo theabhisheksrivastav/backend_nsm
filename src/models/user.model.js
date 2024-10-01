@@ -36,7 +36,7 @@ const userSchema = new Schema(
             required : true,
         },
         otp: {
-            type : String,
+            type : Array,
             required : false,
             trim : true,
         },
