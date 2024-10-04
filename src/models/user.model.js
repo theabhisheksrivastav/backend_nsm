@@ -50,7 +50,6 @@ const userSchema = new Schema(
         timestamps: true
         })
 
-
         // Hash the password & 2FA key before saving the user model
 userSchema.pre('save', async function(next) {
     if (this.isModified('password')) {
