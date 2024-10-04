@@ -31,7 +31,25 @@ const verificationCodePhone = async (phoneNumber) => {
   }
 }
 
-verificationCodePhone(6204226533)
+const sendMailAndMessage = (email,phoneNumber)=>{
+
+ const sendVerifyonMail =  verificationCodeMail(email)
+ const sendVerifyonMessage =  verificationCodePhone(phoneNumber)
+
+  if (sendVerifyonMail && sendVerifyonMessage) {
+    
+     return [sendVerifyonMail,sendVerifyonMessage]
+
+  }else{
+    return [sendVerifyonMail,sendVerifyonMessage]
+  }
+
+
+}
+
+
+
+
 
 const generateAccessAndRefreshToken = async (userId) => {
   try {
@@ -77,6 +95,8 @@ const registerUser = asyncHandler(async (req, res) => {
     }
   }
   const verificationCode = await verificationCodeMail(email);
+  // const [sendVerifyonMail,sendVerifyonMessage] =   sendMailAndMessage("raghvendrakumarpandey321@gmail.com",6204226533)
+// When PHONE MESSAGE OTP API IS READY THAN WE WILL CALL IT
   await User.create({
     fullname,
     email,
