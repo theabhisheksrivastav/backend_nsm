@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken"
 import bcrypt from "bcrypt"
 
 
-//todo : add walletid, countryid, kycid, cryptowalletid, bankid
+        //todo : add walletid, countryid, kycid, cryptowalletid, bankid
 const userSchema = new Schema(
     {
         username: {
@@ -51,10 +51,13 @@ const userSchema = new Schema(
         })
 
 
-        // Hash the password before saving the user model
+        // Hash the password & 2FA key before saving the user model
 userSchema.pre('save', async function(next) {
     if (this.isModified('password')) {
         this.password = await bcrypt.hash(this.password, 8)
+    }
+    if (this.isModified('twoFactorAuth')) {
+        this.twoFactorAuth = await bcrypt.hash(this.twoFactorAuth, 8)
     }
     next()
 })
@@ -62,6 +65,14 @@ userSchema.pre('save', async function(next) {
 userSchema.methods.isPasswordCorrect = async function(password) {
   return await bcrypt.compare(password, this.password)
 }
+
+        // Check if the 2FA key is correct
+userSchema.methods.isTwoFactorAuthCorrect = async function(twoFactorAuth) {
+    return await bcrypt.compare(twoFactorAuth, this.twoFactorAuth)
+}
+// right now dont have the 2fa setup will change as we setup 2fa
+
+
         // Generate an auth token for the user
 userSchema.methods.generateAuthToken = async function() {
     return jwt.sign(
