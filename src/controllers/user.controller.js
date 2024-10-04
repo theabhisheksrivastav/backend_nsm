@@ -5,6 +5,7 @@ import { apiResponse } from '../utils/apiResponse.js'
 import jwt from 'jsonwebtoken'
 import { sendmail } from '../services/mail.service.js'
 import { otpSendHtml, tooManyAttempts } from '../constant.js'
+import { sendMessage } from '../services/sendmessageService.js'
 
 
 function generateVerificationCode() {
@@ -20,6 +21,17 @@ const verificationCodeMail = async (email) => {
     throw new apiError(500, 'Something went wrong while sending OTP');
   }
 }
+const verificationCodePhone = async (phoneNumber) => {
+  const verificationCode = generateVerificationCode();
+  const isMailSent =  sendMessage(phoneNumber,verificationCode)
+  if (isMailSent) {
+    return verificationCode;
+  } else {
+    throw new apiError(500, 'Something went wrong while sending OTP');
+  }
+}
+
+verificationCodePhone(6204226533)
 
 const generateAccessAndRefreshToken = async (userId) => {
   try {

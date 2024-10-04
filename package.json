@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "nodemon -r dotenv/config --experimental-json-modules src/index.js",
     "start": "pm2 start src/index.js",
-    "kill" : "pm2 kill"
+    "kill": "pm2 kill"
   },
   "repository": {
     "type": "git",
@@ -33,6 +33,7 @@
     "mongoose": "^8.6.3",
     "nodemailer": "^6.9.15",
     "pm2": "^5.4.2",
-    "react-icons": "^5.3.0"
+    "react-icons": "^5.3.0",
+    "twilio": "^5.3.3"
   }
 }
