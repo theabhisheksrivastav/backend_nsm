@@ -41,6 +41,14 @@ const userSchema = new Schema(
             type : string,
             required : false,
         },
+        country: {
+            type : Schema.Types.ObjectId,
+            ref : "Country"
+        },
+        kyc: {
+            type : Schema.Types.ObjectId,
+            ref : "Kyc"
+        },
         refreshToken : {
             type : String,
             required : false,
