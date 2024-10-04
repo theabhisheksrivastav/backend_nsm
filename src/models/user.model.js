@@ -2,6 +2,8 @@ import mongoose, {Schema} from "mongoose"
 import jwt from "jsonwebtoken"
 import bcrypt from "bcrypt"
 
+
+//todo : add walletid, countryid, kycid, cryptowalletid, bankid
 const userSchema = new Schema(
     {
         username: {
@@ -30,18 +32,13 @@ const userSchema = new Schema(
             required : true,
             trim : true,
         },
-        isVerified: {
-            type : Boolean,
-            default : false,
+        mobile: {
+            type : String,
             required : true,
-        },
-        otp: {
-            type : Array,
-            required : false,
             trim : true,
         },
-        otpExpires: {
-            type : Date,
+        twoFactorAuth: {
+            type : string,
             required : false,
         },
         refreshToken : {
@@ -53,17 +50,19 @@ const userSchema = new Schema(
         timestamps: true
         })
 
+
+        // Hash the password before saving the user model
 userSchema.pre('save', async function(next) {
     if (this.isModified('password')) {
         this.password = await bcrypt.hash(this.password, 8)
     }
     next()
 })
-
+        // Check if the password is correct
 userSchema.methods.isPasswordCorrect = async function(password) {
   return await bcrypt.compare(password, this.password)
 }
-
+        // Generate an auth token for the user
 userSchema.methods.generateAuthToken = async function() {
     return jwt.sign(
         {
@@ -78,7 +77,7 @@ userSchema.methods.generateAuthToken = async function() {
         }
     )
 }
-
+        //  Generate a refresh token for the user
 userSchema.methods.generateRefreshToken = async function() {
     return jwt.sign(
         {
