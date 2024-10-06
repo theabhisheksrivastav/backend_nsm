@@ -5,6 +5,7 @@ import { apiResponse } from '../utils/apiResponse.js'
 import jwt from 'jsonwebtoken'
 import { sendmail } from '../services/mail.service.js'
 import { otpSendHtml, tooManyAttempts } from '../constant.js'
+import { sendMessage } from '../services/sendmessageService.js'
 
 
 function generateVerificationCode() {
@@ -20,6 +21,35 @@ const verificationCodeMail = async (email) => {
     throw new apiError(500, 'Something went wrong while sending OTP');
   }
 }
+const verificationCodePhone = async (phoneNumber) => {
+  const verificationCode = generateVerificationCode();
+  const isMailSent =  sendMessage(phoneNumber,verificationCode)
+  if (isMailSent) {
+    return verificationCode;
+  } else {
+    throw new apiError(500, 'Something went wrong while sending OTP');
+  }
+}
+
+const sendMailAndMessage = (email,phoneNumber)=>{
+
+ const sendVerifyonMail =  verificationCodeMail(email)
+ const sendVerifyonMessage =  verificationCodePhone(phoneNumber)
+
+  if (sendVerifyonMail && sendVerifyonMessage) {
+    
+     return [sendVerifyonMail,sendVerifyonMessage]
+
+  }else{
+    return [sendVerifyonMail,sendVerifyonMessage]
+  }
+
+
+}
+
+
+
+
 
 const generateAccessAndRefreshToken = async (userId) => {
   try {
@@ -65,6 +95,8 @@ const registerUser = asyncHandler(async (req, res) => {
     }
   }
   const verificationCode = await verificationCodeMail(email);
+  // const [sendVerifyonMail,sendVerifyonMessage] =   sendMailAndMessage("raghvendrakumarpandey321@gmail.com",6204226533)
+// When PHONE MESSAGE OTP API IS READY THAN WE WILL CALL IT
   await User.create({
     fullname,
     email,
