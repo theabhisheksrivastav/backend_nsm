@@ -68,16 +68,16 @@ const generateAccessAndRefreshToken = async (userId) => {
 }
 
 const registerUser = asyncHandler(async (req, res) => {
-  const { username, fullname, email, password } = req.body
+  const { fullname, email, password } = req.body
 
   if (
-    [fullname, username, email, password].some((field) => field?.trim() === "")
+    [fullname,email, password].some((field) => field?.trim() === "")
   ) {
     throw new apiError(400, 'Please fill all the required fields')
   }
 
   const existedUser = await User.findOne({
-    $or: [{ username }, { email }],
+    $or: [{ email }],
   })
   if (existedUser) {
     if (existedUser.isVerified) {
@@ -101,7 +101,6 @@ const registerUser = asyncHandler(async (req, res) => {
     fullname,
     email,
     password,
-    username,
     isVerified: false,
     otp: verificationCode,
     otpExpires: Date.now() + 5 * 60 * 1000,
@@ -110,12 +109,12 @@ const registerUser = asyncHandler(async (req, res) => {
 })
 
 const verifyUser = asyncHandler(async (req, res) => {
-  const { username, fullname, email, password, otp } = req.body;
+  const { fullname, email, password, otp } = req.body;
 
-  if (!username || !fullname || !email || !password || !otp) {
+  if ( !fullname || !email || !password || !otp) {
     throw new apiError(400, 'Please fill all the required fields');
   }
-  const user = await User.findOne({ $or: [{ username }, { email }] });
+  const user = await User.findOne({ $or: [ { email }] });
   if (!user) {
     throw new apiError(404, 'User not found');
   }
@@ -137,13 +136,13 @@ const verifyUser = asyncHandler(async (req, res) => {
 });
 
 const loginUser = asyncHandler(async (req, res) => {
-  const { username, email, password } = req.body
+  const { email, password } = req.body
 
-  if (!(email || username)) {
+  if (!(email )) {
     return res.status(201).send({ sucess: false, message: 'Plese fill all reaqured field' })
   }
 
-  const user = await User.findOne({ $or: [{ username }, { email }] })
+  const user = await User.findOne({ $or: [{ email }] })
 
   if (!user) {
     return res.status(404).send({ sucess: false, message: 'user does not exist' })
