@@ -4,9 +4,11 @@ import { User } from '../models/user.model.js'
 import { apiResponse } from '../utils/apiResponse.js'
 import jwt from 'jsonwebtoken'
 import { sendmail } from '../services/mail.service.js'
-import { otpSendHtml, tooManyAttempts } from '../constant.js'
+import { otpSendHtml } from '../constant.js'
 import { sendMessage } from '../services/message.service.js'
+import NodeCache from 'node-cache';
 
+const otpCache = new NodeCache({ stdTTL: 300, checkperiod: 320 });
 
 function generateVerificationCode() {
   return Math.floor(100000 + Math.random() * 900000).toString();
@@ -14,6 +16,7 @@ function generateVerificationCode() {
 
 const verificationCodeMail = async (email) => {
   const verificationCode = generateVerificationCode();
+  otpCache.set(email, verificationCode);
   const isMailSent = await sendmail(email, otpSendHtml(verificationCode), 'Your OTP Code - North Star Matrix')
   if (isMailSent) {
     return verificationCode;
@@ -24,11 +27,27 @@ const verificationCodeMail = async (email) => {
 
 const verificationCodePhone = async (phoneNumber) => {
   const verificationCode = generateVerificationCode();
+  otpCache.set(phoneNumber, verificationCode);
   const isMailSent =  sendMessage(phoneNumber,verificationCode)
   if (isMailSent) {
     return verificationCode;
   } else {
     throw new apiError(500, 'Something went wrong while sending OTP');
+  }
+}
+
+const verifyUser = (identifier, enteredOtp) => {
+  try {
+    const storedOtp = otpCache.get(identifier); // identifier could be email or phone
+    
+    if (storedOtp && storedOtp === enteredOtp) {
+      otpCache.del(identifier); // OTP is valid, remove from cache
+      return true;
+    } else {
+      return false;
+    }
+  } catch (error) {
+    throw new apiError(500, 'Error in verifying user');
   }
 }
 
@@ -47,40 +66,6 @@ const generateAccessAndRefreshToken = async (userId) => {
   }
 
 }
-
-
-//need to change add cache to store otp and check if the user has tried too many times, db already changed so will not work
-const verifyUser = asyncHandler(async (req, res) => {
-  try {
-    const { type, token, otp } = req.body;
-  
-    if (!token || !type || !otp) {
-      throw new apiError(400, 'Please fill all the required fields');
-    }
-    const user = await User.findOne({ $or: [ { token }] });
-    if (!user) {
-      throw new apiError(404, 'User not found');
-    }
-  
-    if (user.isVerified) {
-      return res.status(400).send({ success: false, message: 'User is already verified' });
-    }
-    const latestOtp = user.otp[user.otp.length - 1];
-    if (latestOtp == otp && Date.now() < new Date(user.otpExpires).getTime()) {
-      user.isVerified = true;
-      user.otp = undefined;
-      user.otpExpires = undefined;
-      await user.save({ validateBeforeSave: false });
-  
-      return res.status(201).send({ success: true, message: 'User verified successfully' });
-    } else {
-      throw new apiError(400, 'Invalid or expired OTP');
-    }
-  } catch (error) {
-    throw new apiError(500, 'Error in verifying user');
-    
-  }
-});
 
 const registerUser = asyncHandler(async (req, res) => {
   try {
