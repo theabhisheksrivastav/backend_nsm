@@ -32,6 +32,30 @@ const verificationCodePhone = async (phoneNumber) => {
   }
 }
 
+<<<<<<< HEAD
+=======
+const sendMailAndMessage = (email,phoneNumber)=>{
+
+ try {
+  const sendVerifyonMail =  verificationCodeMail(email)
+  const sendVerifyonMessage =  verificationCodePhone(phoneNumber)
+ 
+   if (sendVerifyonMail && sendVerifyonMessage) {
+     
+      return [sendVerifyonMail,sendVerifyonMessage]
+ 
+   }else{
+     return [sendVerifyonMail,sendVerifyonMessage]
+   }
+ 
+ } catch (error) {
+   throw new apiError(500, 'Error in sending mail and message')
+  
+ }
+
+}
+
+>>>>>>> d5f231aefdb435a8078bf16ef42dc459b92bf460
 const generateAccessAndRefreshToken = async (userId) => {
   try {
     const user = await User.findById(userId)
@@ -48,16 +72,73 @@ const generateAccessAndRefreshToken = async (userId) => {
 
 }
 
+<<<<<<< HEAD
+=======
+const registerUser = asyncHandler(async (req, res) => {
+  try {
+    const { fullname, email, password } = req.body
+  
+    if (
+      [fullname,email, password].some((field) => field?.trim() === "")
+    ) {
+      throw new apiError(400, 'Please fill all the required fields')
+    }
+  
+    const existedUser = await User.findOne({
+      $or: [{ email }],
+    })
+    if (existedUser) {
+      if (existedUser.isVerified) {
+        return res.status(409).send({ success: false, message: 'Verified user already exists' });
+      } else if (existedUser.otp.length > 4) {
+        await User.findByIdAndDelete(existedUser._id);
+        sendmail(email, tooManyAttempts, 'Too many verification attempts');
+        return res.status(409).send({ success: false, message: 'Too many attempts please register after some time' });
+      } else {
+        const verificationCode = await verificationCodeMail(email);
+        existedUser.otp.push(verificationCode);
+        existedUser.otpExpires = Date.now() + 5 * 60 * 1000;
+        await existedUser.save({ validateBeforeSave: true });
+        return res.status(209).send({ success: true, message: 'User already exists', attempts: existedUser.otp.length });
+      }
+    }
+    const verificationCode = await verificationCodeMail(email);
+    // const [sendVerifyonMail,sendVerifyonMessage] =   sendMailAndMessage("raghvendrakumarpandey321@gmail.com",6204226533)
+  // When PHONE MESSAGE OTP API IS READY THAN WE WILL CALL IT
+    await User.create({
+      fullname,
+      email,
+      password,
+      isVerified: false,
+      otp: verificationCode,
+      otpExpires: Date.now() + 5 * 60 * 1000,
+    });
+    return res.status(201).send({ success: true, message: 'User created successfully' });
+  } catch (error) {
+    throw new apiError(500, 'Error in registering user')
+    
+  }
+})
+>>>>>>> d5f231aefdb435a8078bf16ef42dc459b92bf460
 
 //need to change add cache to store otp and check if the user has tried too many times, db already changed so will not work
 const verifyUser = asyncHandler(async (req, res) => {
   try {
+<<<<<<< HEAD
     const { type, token, otp } = req.body;
   
     if (!token || !type || !otp) {
       throw new apiError(400, 'Please fill all the required fields');
     }
     const user = await User.findOne({ $or: [ { token }] });
+=======
+    const { fullname, email, password, otp } = req.body;
+  
+    if ( !fullname || !email || !password || !otp) {
+      throw new apiError(400, 'Please fill all the required fields');
+    }
+    const user = await User.findOne({ $or: [ { email }] });
+>>>>>>> d5f231aefdb435a8078bf16ef42dc459b92bf460
     if (!user) {
       throw new apiError(404, 'User not found');
     }
@@ -259,6 +340,38 @@ const getCurrentUser = asyncHandler(async (req, res) => {
   throw new apiError(500, 'Error in fetching user')
   
 }
+<<<<<<< HEAD
+=======
+})
+
+const updateAccountDetails = asyncHandler(async (req, res) => {
+
+try {
+  
+    const { fullname, email } = req.body
+  
+    const user = await User.findByIdAndUpdate(req.user?._id,
+      {
+        $set: {
+          fullname: fullname || req.user?.fullname,
+          email: email || req.user?.email
+        }
+      },
+      {
+        new: true,
+        runValidators: true
+      }).select('-password -refreshToken')
+    await user.save({ validateBeforeSave: false })
+  
+    return res
+      .status(200)
+      .json(new apiResponse(200, user, 'Account details updated successfully'))
+} catch (error) {
+  throw new apiError(500, 'Error in updating account details')
+  
+}
+
+>>>>>>> d5f231aefdb435a8078bf16ef42dc459b92bf460
 })
 
 export {
