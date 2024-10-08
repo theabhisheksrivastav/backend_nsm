@@ -259,38 +259,6 @@ const getCurrentUser = asyncHandler(async (req, res) => {
   throw new apiError(500, 'Error in fetching user')
   
 }
-<<<<<<< HEAD
-=======
-})
-
-const updateAccountDetails = asyncHandler(async (req, res) => {
-
-try {
-  
-    const { fullname, email } = req.body
-  
-    const user = await User.findByIdAndUpdate(req.user?._id,
-      {
-        $set: {
-          fullname: fullname || req.user?.fullname,
-          email: email || req.user?.email
-        }
-      },
-      {
-        new: true,
-        runValidators: true
-      }).select('-password -refreshToken')
-    await user.save({ validateBeforeSave: false })
-  
-    return res
-      .status(200)
-      .json(new apiResponse(200, user, 'Account details updated successfully'))
-} catch (error) {
-  throw new apiError(500, 'Error in updating account details')
-  
-}
-
->>>>>>> d5f231aefdb435a8078bf16ef42dc459b92bf460
 })
 
 export {
