@@ -12,22 +12,28 @@ const transporter = nodemailer.createTransport({
   });
 
 export const sendmail = async (email, html, subject)=>{
-    const mailOptions = {
-      from: process.env.EMAIL,
-      to: email,
-      subject: subject,
-      html: html,
-    };
-    transporter.sendMail(mailOptions, (error, info) => {
-      if (error) {
-        console.log(error);
-        return  false;
-      }
-      console.log(info);
-       return true;
-    });
-  
-    return true
+    try {
+      const mailOptions = {
+        from: process.env.EMAIL,
+        to: email,
+        subject: subject,
+        html: html,
+      };
+      transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+          console.log(error);
+          return  false;
+        }
+        console.log(info);
+         return true;
+      });
+    
+      return true
+    } catch (error) {
+      console.log(error);
+      return false
+      
+    }
   
   }
 
