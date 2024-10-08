@@ -21,6 +21,7 @@ const verificationCodeMail = async (email) => {
     throw new apiError(500, 'Something went wrong while sending OTP');
   }
 }
+
 const verificationCodePhone = async (phoneNumber) => {
   const verificationCode = generateVerificationCode();
   const isMailSent =  sendMessage(phoneNumber,verificationCode)
@@ -46,10 +47,6 @@ const sendMailAndMessage = (email,phoneNumber)=>{
 
 
 }
-
-
-
-
 
 const generateAccessAndRefreshToken = async (userId) => {
   try {
