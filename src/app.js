@@ -17,10 +17,12 @@ app.use(cookieParser())
 
 //routes import
 import userRouter from './routes/user.routes.js'
+import marketRouter from './routes/market.routes.js'
 
 
 //routes declaration
 app.use("/api/v1/users", userRouter)
+app.use("/api/v1/markets", marketRouter)
 
 
 export { app }

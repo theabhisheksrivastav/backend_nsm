@@ -31,7 +31,7 @@ const userSchema = new Schema(
             trim : true,
         },
         twoFactorAuth: {
-            type : string,
+            type : String,
             required : false,
         },
         country: {

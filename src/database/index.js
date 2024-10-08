@@ -1,14 +1,20 @@
 import mongoose from "mongoose";
-import{DB_NAME} from "../constant.js";
+import { MongoMemoryServer } from "mongodb-memory-server";
 
 const connectDB = async () => {
     try {
-     const connectionInstance = await mongoose.connect(`${process.env.MONGODB_URI}/${DB_NAME}`)
-     console.log(`\n MongoDB connected: ${connectionInstance.connection.host} ${process.env.MONGODB_URI}`);
-     } catch (error) {
-         console.error('Error connecting to MongoDB: ', error);
-         process.exit(1);
+        const mongoServer = await MongoMemoryServer.create();
+        const uri = mongoServer.getUri();
+        const connectionInstance = await mongoose.connect(uri, {
+            useNewUrlParser: true,
+            useUnifiedTopology: true,
+        });
+
+        console.log(`MongoDB connected: ${connectionInstance.connection.host}`);
+    } catch (error) {
+        console.error('Error connecting to MongoDB: ', error);
+        process.exit(1);
     }
-}
+};
 
 export default connectDB;

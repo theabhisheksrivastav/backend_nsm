@@ -5,7 +5,7 @@ import { apiResponse } from '../utils/apiResponse.js'
 import jwt from 'jsonwebtoken'
 import { sendmail } from '../services/mail.service.js'
 import { otpSendHtml } from '../constant.js'
-import { sendMessage } from '../services/message.service.js'
+// import { sendMessage } from '../services/message.service.js'
 import NodeCache from 'node-cache';
 
 const otpCache = new NodeCache({ stdTTL: 300, checkperiod: 320 });
@@ -25,16 +25,16 @@ const verificationCodeMail = async (email) => {
   }
 }
 
-const verificationCodePhone = async (phoneNumber) => {
-  const verificationCode = generateVerificationCode();
-  otpCache.set(phoneNumber, verificationCode);
-  const isMailSent =  sendMessage(phoneNumber,verificationCode)
-  if (isMailSent) {
-    return verificationCode;
-  } else {
-    throw new apiError(500, 'Something went wrong while sending OTP');
-  }
-}
+// const verificationCodePhone = async (phoneNumber) => {
+//   const verificationCode = generateVerificationCode();
+//   otpCache.set(phoneNumber, verificationCode);
+//   const isMailSent =  sendMessage(phoneNumber,verificationCode)
+//   if (isMailSent) {
+//     return verificationCode;
+//   } else {
+//     throw new apiError(500, 'Something went wrong while sending OTP');
+//   }
+// }
 
 const verifyUser = (identifier, enteredOtp) => {
   try {
@@ -69,7 +69,7 @@ const generateAccessAndRefreshToken = async (userId) => {
 
 const registerUser = asyncHandler(async (req, res) => {
   try {
-    const { fullname, email, mobile, country, password } = req.body
+    const { fullname, email, mobile, password } = req.body
   
     if (
       [fullname, email, mobile, password].some((field) => field?.trim() === "")
@@ -87,13 +87,12 @@ const registerUser = asyncHandler(async (req, res) => {
       fullname,
       email,
       mobile,
-      country,
       password,
       
     });
     return res.status(201).send({ success: true, message: 'User created successfully' });
   } catch (error) {
-    throw new apiError(500, 'Error in registering user')
+    return res.status(500).send({ success: false, message: 'Error in registering user', error: error.message });
     
   }
 })
@@ -255,6 +254,6 @@ export {
   getCurrentUser,
   verifyUser,
   verificationCodeMail,
-  verificationCodePhone
+  // verificationCodePhone
 
 }

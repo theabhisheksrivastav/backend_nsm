@@ -8,7 +8,7 @@ import {
     getCurrentUser, 
     verifyUser,
     verificationCodeMail,
-    verificationCodePhone
+    // verificationCodePhone
  } from "../controllers/user.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 
@@ -18,7 +18,7 @@ router.route("/register").post(registerUser)
 router.route("/login").post(loginUser)
 router.route("/verify").post(verifyUser)
 router.route("/verify-mail").post(verificationCodeMail)
-router.route("/verify-phone").post(verificationCodePhone)
+// router.route("/verify-phone").post(verificationCodePhone)
 
 
 
