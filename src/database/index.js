@@ -1,10 +1,11 @@
 import mongoose from "mongoose";
 import { MongoMemoryServer } from "mongodb-memory-server";
+import { DB_NAME } from "../constant.js"
 
 const connectDB = async () => {
     try {
         const mongoServer = await MongoMemoryServer.create();
-        const uri = mongoServer.getUri();
+        const uri = `${mongoServer.getUri()}${DB_NAME ? DB_NAME : ''}`;
         const connectionInstance = await mongoose.connect(uri, {
             useNewUrlParser: true,
             useUnifiedTopology: true,

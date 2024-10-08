@@ -7,9 +7,9 @@ import {
 
 const router = Router();
 
-router.route("/refresh-db").post(fetchAndSaveTopCryptos)
-router.route("/checkcrypto").post(fetchCryptoFromDatabase)
-router.route("/market").post(fetchAllCryptosFromDatabase)
+router.route("/refresh-db").patch(fetchAndSaveTopCryptos)
+router.route("/checkcrypto").get(fetchCryptoFromDatabase)
+router.route("").get(fetchAllCryptosFromDatabase)
 
 
 
