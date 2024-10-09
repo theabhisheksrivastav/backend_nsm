@@ -42,6 +42,11 @@ const userSchema = new Schema(
             type : Schema.Types.ObjectId,
             ref : "Kyc"
         },
+        walletId:{
+            type:String,
+            required:true,
+
+        },
         refreshToken : {
             type : String,
             required : false,
