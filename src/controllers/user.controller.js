@@ -5,8 +5,16 @@ import { apiResponse } from '../utils/apiResponse.js'
 import jwt from 'jsonwebtoken'
 import { sendmail } from '../services/mail.service.js'
 import { otpSendHtml } from '../constant.js'
+import { v4 as uuidv4 } from 'uuid';
+
+
 // import { sendMessage } from '../services/message.service.js'
 import NodeCache from 'node-cache';
+import { wallet } from '../models/wallet.model.js'
+
+// const uuid = uuidv4()
+// console.log(uuid);
+
 
 const otpCache = new NodeCache({ stdTTL: 300, checkperiod: 320 });
 
@@ -83,11 +91,25 @@ const registerUser = asyncHandler(async (req, res) => {
     if (existedUser) {
       throw new apiError(400, 'User already exists')
     }
+
+  const wallets =   await wallet.create({
+      
+      walletAddress:uuidv4(),
+
+      
+    });
+    
+   if (!wallets) {
+    throw new apiError(400, 'internal server error from walletid')
+   }
+    
+
     await User.create({
       fullname,
       email,
       mobile,
       password,
+      walletId:wallets._id
       
     });
     return res.status(201).send({ success: true, message: 'User created successfully' });
@@ -143,6 +165,8 @@ const loginUser = asyncHandler(async (req, res) => {
   }
 
 })
+
+
 
 const logoutUser = asyncHandler(async (req, res) => {
   try {
@@ -254,6 +278,7 @@ export {
   getCurrentUser,
   verifyUser,
   verificationCodeMail,
+
   // verificationCodePhone
 
 }
