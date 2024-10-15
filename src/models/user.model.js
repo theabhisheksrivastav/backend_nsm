@@ -12,7 +12,7 @@ const userSchema = new Schema(
             required : true,
             unique : true,
             lowercase : true,
-            trim : true,
+            match : [ /^[a-zA-Z0-9._%+-]+@(gmail\.com|yahoo\.com|outlook\.com)$/, "Please use a proper email"]
         },
         fullname: {
             type : String,
